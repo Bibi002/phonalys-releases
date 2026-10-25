@@ -1,0 +1,50 @@
+# Signature gratuite et automatique de chaque version publiée.
+#
+# Aucun secret : Sigstore délivre un certificat de quelques minutes lié à ce workflow
+# (identité OIDC de GitHub) et inscrit la signature dans son journal public de
+# transparence. GitHub ajoute une attestation de provenance pour chaque fichier.
+name: Signature
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Version à signer (par exemple v0.1.1)
+        required: true
+
+permissions: {}
+
+jobs:
+  sign:
+    name: Signer
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - name: Télécharger la version
+        run: |
+          case "$TAG" in v[0-9]*) ;; *) echo "Étiquette invalide : $TAG" >&2; exit 1 ;; esac
+          gh release download "$TAG" -D dist --pattern '*' --skip-existing
+          rm -f dist/*.sigstore.json
+      - name: Vérifier les empreintes
+        working-directory: dist
+        run: sha256sum --check --strict SHA256SUMS.txt
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: v3.1.3
+      - name: Signer SHA256SUMS.txt (Sigstore)
+        working-directory: dist
+        run: cosign sign-blob --yes --bundle SHA256SUMS.txt.sigstore.json SHA256SUMS.txt
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
+        with:
+          subject-checksums: dist/SHA256SUMS.txt
+      - name: Joindre la signature
+        run: gh release upload "$TAG" dist/SHA256SUMS.txt.sigstore.json --clobber

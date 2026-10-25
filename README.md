@@ -21,6 +21,25 @@ Avant d'installer, lisez le **[guide d'installation](INSTALLATION.md)** et véri
 
 > Les versions actuelles ne sont pas encore signées : Windows affiche un avertissement SmartScreen. N'installez que si l'empreinte correspond.
 
+## Vérifier l'authenticité (facultatif, pour les informaticiens)
+
+Chaque version est signée automatiquement avec [Sigstore](https://www.sigstore.dev) et porte une attestation de provenance GitHub. La signature prouve que les fichiers ont été publiés par ce dépôt et n'ont pas été modifiés.
+
+Avec l'outil [GitHub CLI](https://cli.github.com) :
+
+```sh
+gh attestation verify Phonalys_<version>_x64-setup.exe -R Bibi002/phonalys-releases
+```
+
+Avec [cosign](https://docs.sigstore.dev/cosign/system_config/installation/) :
+
+```sh
+cosign verify-blob SHA256SUMS.txt --bundle SHA256SUMS.txt.sigstore.json \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github\.com/Bibi002/phonalys-releases/\.github/workflows/signer\.yml@'
+sha256sum --check --ignore-missing SHA256SUMS.txt
+```
+
 ## Sécurité
 
 Pour signaler une faille, voir [SECURITY.md](SECURITY.md).
