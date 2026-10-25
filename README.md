@@ -2,7 +2,7 @@
 
 Logiciel pour les logopèdes : dossier patient, bilans, exercices et assistant de rédaction, **entièrement hébergés chez vous**.
 
-- **Vos données restent au cabinet** : aucun compte en ligne, aucun envoi à l'éditeur, aucune télémétrie.
+- **Vos données restent au cabinet** : aucun compte en ligne, aucun envoi à l'éditeur, aucune télémétrie. L'application vérifie seulement, au démarrage, si une nouvelle version existe ; elle ne l'installe qu'avec votre accord.
 - **Sécurité** : coffre chiffré, connexion à deux facteurs (phrase de passe et biométrie), verrouillage automatique, journal d'audit.
 - **IA locale uniquement** : l'assistant de rédaction utilise un modèle installé sur votre matériel (Ollama, LM Studio…). Les IA en ligne sont bloquées.
 - **Windows, Linux, iPhone et Android** (ces deux derniers via le serveur du cabinet).
